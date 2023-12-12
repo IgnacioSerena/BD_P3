@@ -7,14 +7,14 @@
 # ***************************************************
 # you may edit the following variables
 #      error message when no arguments are provided
-set noArguments "1"
+set noArguments "Missing argument"
 #     error message when strategy name is wrong
-set wrongStrategy "2"
+set wrongStrategy "Unknown search strategy unknown_search_strategy"
 # ****************************************************
 # Do NOT edit anything below this point
 
 set timeout -1
-set programName "library"
+set programName "main"
 set output "init"
 
 # no arguments

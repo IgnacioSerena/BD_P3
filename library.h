@@ -1,4 +1,4 @@
 #include "types.h"
-#include <stdio.h>
 
-int main(int argc, char *argv[]);
+int add(FILE *f, char *str);
+int exit_lib(FILE *f);
