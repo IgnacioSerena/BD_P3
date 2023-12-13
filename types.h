@@ -15,7 +15,7 @@ typedef enum
 
 // Estructura para representar una entrada en el índice
 typedef struct {
-    int key;         // ISBN del libro
+    char *key;         // ISBN del libro
     long int offset;  // Desplazamiento en el archivo de datos
     size_t size;      // Tamaño del registro del libro
 } IndexEntry;

@@ -1,12 +1,12 @@
 CC=gcc
 CFLAGS = -g -Wall -pedantic 
 MAINDEP = main.o library.o index.o
-EXPECT_SCRIPT = cli_tests.sh
+EXPECT_SCRIPT = add_data_test.sh
 
 all: main 
 
 test:
-	expect add_data_test.sh
+	expect $(EXPECT_SCRIPT)
 
 main: $(MAINDEP)
 	$(CC) $(CFLAGS) -o $@ $(MAINDEP)
@@ -18,9 +18,9 @@ run:
 	./main first_fit test
 
 runv:
-	valgrind --track-origins=yes ./main first_fit test
+	valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes -s ./main first_fit test
 
 clean: 
-	rm -f *.o main test
+	rm -f *.o main
 
 .PHONY: all test clean

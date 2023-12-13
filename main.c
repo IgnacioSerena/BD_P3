@@ -1,10 +1,12 @@
 #include "types.h"
 #include "library.h"
+#include "index.h"
 
 int main(int argc, char *argv[])
 {
-    char str[MAX_STR], *command, *name;
+    char str[MAX_STR], *command = NULL, *name, *toks, *info = NULL;
     FILE *f;
+    Index *index;
 
     if (argc < 3)
     {
@@ -24,24 +26,44 @@ int main(int argc, char *argv[])
     if (!f)
         return ERR;
 
+    index = initIndex(100);
+    if (!index)
+    {
+        exit_lib(f, NULL);
+        return ERR;
+    }
+
     printf("Type command and argument/s.\n");
 
-    while(fgets(str, MAX_STR, stdin))
+    while (fgets(str, MAX_STR, stdin))
     {
-        str[strcspn(str, "\n")] = '\0';
-        command = strtok(str, " ");
-        printf("%s\n", command);
-        
-        if (strcmp(command, "exit") == 0)
+        toks = strtok(str, " ");
+        command = toks;
+        command[strcspn(str, "\n")] = '\0';
+
+        toks = strtok(NULL, "\n");
+        if(toks != NULL)
+            info = toks;
+
+        if (command)
         {
-            exit_lib(f);
-            break;
+            if ((strcmp(command, "exit") == 0))
+                break;
+            else if (strcmp(command, "add") == 0)
+            {
+                if (add(f, info, index) == ERR)
+                    printf("Error adding book\n");
+            }
+            else if (strcmp(command, "printInd") == 0)
+                printIndex(index);
+            else
+                printf("Write down a valid command\n");
         }
-        else if (strcmp(command, "add") == 0)
-        {
-            add(f, str);
-        }
+        else
+            printf("Write down a valid command\n");
     }
+
+    exit_lib(f, index);
 
     return OK;
 }
