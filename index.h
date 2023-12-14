@@ -10,15 +10,15 @@ Index *initIndex(size_t initialCapacity);
 void freeIndex(Index *index);
 
 // Función para insertar una entrada en el índice
-int insertEntry(Index *index, char *key, long int offset, size_t size);
+int insertEntry(Index *index, int key, long int offset, size_t size);
 
 // Función para realizar una búsqueda binaria en el índice
-int binarySearch(const Index *index, char *key);
+int binarySearch(const Index *index, int key);
 
 // Función para expandir el índice
 int expandIndex(Index *index);
 
 // Función para imprimir el índice
-void printIndex(Index *index);
+void printIndex(Index *index, FILE *f);
 
 #endif // INDEX_H

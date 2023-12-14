@@ -8,7 +8,7 @@
 
 
 set timeout -1
-set programName "library"
+set programName "main"
 set filename "test"
 
 # delete all files starting with test

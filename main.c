@@ -4,8 +4,8 @@
 
 int main(int argc, char *argv[])
 {
-    char str[MAX_STR], *command = NULL, *name, *toks, *info = NULL;
-    FILE *f;
+    char str[MAX_STR], *command = NULL, name[MAX_STR], *name_ind, *toks, *info = NULL;
+    FILE *f, *f1;
     Index *index;
 
     if (argc < 3)
@@ -19,13 +19,17 @@ int main(int argc, char *argv[])
         return ERR;
     }
 
-    name = argv[2];
+    strcpy(name, argv[2]);
     strcat(name, ".db");
+
+    name_ind = argv[2];
+    strcat(name_ind, ".ind");
+
 
     f = fopen(name, "w");
     if (!f)
         return ERR;
-
+    
     index = initIndex(100);
     if (!index)
     {
@@ -34,6 +38,7 @@ int main(int argc, char *argv[])
     }
 
     printf("Type command and argument/s.\n");
+    printf("exit\n");
 
     while (fgets(str, MAX_STR, stdin))
     {
@@ -55,14 +60,18 @@ int main(int argc, char *argv[])
                     printf("Error adding book\n");
             }
             else if (strcmp(command, "printInd") == 0)
-                printIndex(index);
+                printIndex(index, stdout);
             else
                 printf("Write down a valid command\n");
         }
         else
             printf("Write down a valid command\n");
+        printf("exit\n");
     }
 
+    f1 = fopen(name_ind, "w");
+    printIndex(index, f1);
+    fclose(f1);
     exit_lib(f, index);
 
     return OK;

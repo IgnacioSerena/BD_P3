@@ -3,33 +3,24 @@
 
 int add(FILE *f, char *str, Index *index)
 {
-    char *toks, *title, *editorial, *key;
+    char *toks, *title, *isbn;
     int id;
     size_t size;
 
     toks = strtok(str, "|");
     id = atoi(toks);
     toks = strtok(NULL, "|");
-    key = strdup(toks);
-    toks = strtok(NULL, "|");
+    isbn = toks;
+    toks = strtok(NULL, "\\");
     title = toks;
-    toks = strtok(NULL, "|");
-    editorial = toks;
 
-    printf("%s %s\n", title, editorial);
+    fseek(f, 0, SEEK_END);
+    size_t offset = ftell(f) - index->size; // Obtiene el offset actual al final del archivo
+    size = sizeof(int) + strlen(isbn) + strlen(title);
 
-    size_t offset = ftell(f); // Obtiene el offset actual al final del archivo
-    size = sizeof(int) + 16 * sizeof(char) + strlen(title) + strlen(editorial);
-
-    if(index->size > 0)
+    if (binarySearch(index, id) == -1)
     {
-        printf("1\n");
-        offset += index->entries[index->size - 1].offset;
-    }
-
-    if (binarySearch(index, key) == -1)
-    {
-        if (insertEntry(index, key, offset, size) == ERR)
+        if (insertEntry(index, id, offset, size) == ERR)
             return ERR;
     }
     else
@@ -40,9 +31,8 @@ int add(FILE *f, char *str, Index *index)
 
     fwrite(&size, sizeof(size_t), 1, f);
     fwrite(&id, sizeof(int), 1, f);
-    fwrite(&key, 16 * sizeof(char), 1, f);
+    fwrite(isbn, 16 * sizeof(char), 1, f);
     fwrite(title, strlen(title) + 1, 1, f);
-    fwrite(editorial, strlen(editorial) + 1, 1, f);
 
     printf("Record with BookID=%d has been added to the database\n", id);
 

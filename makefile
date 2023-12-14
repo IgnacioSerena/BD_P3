@@ -18,7 +18,9 @@ run:
 	./main first_fit test
 
 runv:
-	valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes -s ./main first_fit test
+	valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes -s ./main first_fit test || true
+
+
 
 clean: 
 	rm -f *.o main

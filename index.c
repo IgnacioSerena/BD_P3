@@ -19,8 +19,6 @@ Index *initIndex(size_t capacity)
     }
 
     index->size = 0;
-    index->entries[0].size = 0;
-    index->entries[0].offset = 0;
     index->capacity = capacity;
 
     return index;
@@ -29,16 +27,12 @@ Index *initIndex(size_t capacity)
 // Función para liberar la memoria del índice
 void freeIndex(Index *index)
 {
-    for(int i = 0; i < index->size; i++)
-        free(index->entries[i].key);
-
-
     free(index->entries);
     free(index);
 }
 
 // Función para buscar la posición de un ISBN en el índice (búsqueda binaria)
-int binarySearch(const Index *index, char *key)
+int binarySearch(const Index *index, int key)
 {
     int low = 0;
     int high = index->size - 1;
@@ -46,9 +40,9 @@ int binarySearch(const Index *index, char *key)
     while (low <= high)
     {
         int mid = (low + high) / 2;
-        if (strcmp(index->entries[mid].key, key) == 0)
+        if (index->entries[mid].key == key)
         {
-            return mid; // Se encontró el ISBN
+            return mid; // Se encontró el id
         }
         else if (index->entries[mid].key < key)
         {
@@ -60,24 +54,45 @@ int binarySearch(const Index *index, char *key)
         }
     }
 
-    return -1; // No se encontró el ISBN
+    return -1; // No se encontró el id
 }
 
 // Función para insertar una entrada en el índice
-int insertEntry(Index *index, char *key, long int offset, size_t size)
+int insertEntry(Index *index, int key, long int offset, size_t size)
 {
-    // Inserta la nueva entrada
-    index->entries[index->size].size = size;
-    index->entries[index->size].key = key;
-    index->entries[index->size].offset = offset;
+    int i, pos = 0;
 
     // Asegurarse de tener espacio suficiente
-    if (index->entries[index->size].size == index->capacity)
+    if (index->size == index->capacity)
     {
         if (expandIndex(index) == ERR)
             return ERR; // Error al expandir el índice
     }
-    
+
+    while (pos < index->size && index->entries[pos].key < key)
+        pos++;
+
+    // Desplaza las entradas para abrir espacio para la nueva entrada
+    i = index->size - 1;
+    while (i >= pos)
+    {
+        index->entries[i + 1] = index->entries[i];
+        i--;
+    }
+
+    /* if(i == 0)
+     {
+         index->entries[i].size = size;
+         index->entries[i].key = key;
+         index->entries[i].offset = offset;
+         index->size++;
+         return OK;
+     }*/
+
+    index->entries[pos].size = size;
+    index->entries[pos].key = key;
+    index->entries[pos].offset = offset;
+
     // Incrementa el tamaño del índice
     index->size++;
 
@@ -104,13 +119,28 @@ int expandIndex(Index *index)
 }
 
 // Función para imprimir el índice
-void printIndex(Index *index)
+void printIndex(Index *index, FILE *f)
 {
     for (size_t i = 0; i < index->size; i++)
     {
-        printf("Entry #%zu\n", i);
-        printf("  key: #%s\n", index->entries[i].key);
-        printf("  offset: #%ld\n", index->entries[i].offset);
-        printf("  size: #%zu\n", index->entries[i].size);
+        fprintf(f, "Entry #%zu\n", i);
+        fprintf(f, "    key: #%d\n", index->entries[i].key);
+        fprintf(f, "    offset: #%ld\n", index->entries[i].offset);
+        fprintf(f, "    size: #%zu\n", index->entries[i].size);
     }
 }
+
+/*int swap(IndexEntry *a, IndexEntry *b)
+{
+    int key_aux;
+    size_t size_aux;
+    long int offset_aux;
+
+    key_aux = a->key;
+    size_aux = a->size;
+    offset_aux = a->offset;
+
+    a->key = b->key;
+    a->size = b->size;
+    a->offset = b->offset;
+}*/
