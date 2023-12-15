@@ -6,6 +6,9 @@
 #define TYPES_H
 
 #define MAX_STR 100
+#define BESTFIT 0
+#define WORSTFIT 1
+#define FIRSTFIT 2
 
 typedef enum
 {
@@ -26,5 +29,11 @@ typedef struct {
     size_t size;          // Número actual de entradas en el índice
     size_t capacity;      // Capacidad actual del índice
 } Index;
+
+typedef struct {
+    IndexEntry *entries;  // Array de entradas en el índice
+    size_t size;          // Número actual de entradas en el índice
+    size_t capacity;      // Capacidad actual del índice
+} IndexDeleted;
 
 #endif /* TYPES_H */

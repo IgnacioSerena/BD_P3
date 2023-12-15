@@ -39,22 +39,20 @@ int add(FILE *f, char *str, Index *index)
     return OK;
 }
 
-int exit_lib(FILE *f, Index *index, FILE *f1)
+int exit_lib(FILE *f, Index *index, IndexDeleted *index_del)
 {
     freeIndex(index);
-    fclose(f1);
+    freeIndexDeleted(index_del);
     fclose(f);
 
     return OK;
 }
 
-int find(Index *index, char *key, FILE *f)
+int find(Index *index, int id, FILE *f)
 {
     char isbn[MAX_STR], title[MAX_STR];
-    int id, pos;
+    int pos;
     size_t tam_title;
-
-    id = atoi(key);
 
     pos = binarySearch(index, id);
     if (pos == -1)
@@ -68,24 +66,48 @@ int find(Index *index, char *key, FILE *f)
         tam_title = index->entries[pos].size - (sizeof(id) + 16 * sizeof(char));
         fread(title, tam_title, 1, f);
         title[tam_title] = '\0';
-        printf("%d%s%s\n", id, isbn, title);
+        printf("%d|%s|%s\n", id, isbn, title);
     }
 
     return OK;
 }
 
-void printInd(Index *index, FILE *f, FILE *f1)
+void printInd(Index *index, FILE *f)
 {
-    printIndex(index, f, f1);
+    printIndex(index, f);
 }
 
-/*void printRec(Index *index, FILE *f, int num)
+void printRec(Index *index, FILE *f, int num)
 {
-    if (num < 0)
-        return;
-    else
+    if (index->size != num)
     {
-        find(index, num--, f);
+        find(index, index->entries[num++].key, f);
         printRec(index, f, num);
     }
-}*/
+}
+
+int delete(Index *index, IndexDeleted *index_del, int key)
+{ 
+/*   long int offset_dif;  
+    int pos = binarySearch(index, key);
+    if (pos != -1)
+    {
+        if (insertEntryDeleted(index_del, index->entries[pos].key, index->entries[pos].offset, index->entries[pos].size) == ERR)
+            return ERR;
+        
+        index->entries[pos].key = 0;
+        index->entries[pos].size = 0;
+        offset_dif = index->entries[pos + 1].offset - index->entries[pos].offset;
+        index->entries[pos + 1].offset = index->entries[pos].offset;
+        index->entries[pos].offset = 0;
+        
+        for(int i = pos + 2; i < index->size; i++)
+            index->entries[i].offset = index->entries[i - 1].offset + offset_dif;
+        
+        printf("Record with bookId=%d has been deleted", key);
+    }
+    else
+        printf("Record with bookId=%d does not exist\n", key);
+*/
+    return OK;
+}

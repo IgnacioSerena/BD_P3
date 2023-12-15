@@ -4,9 +4,13 @@
 
 int main(int argc, char *argv[])
 {
-    char str[MAX_STR], *command = NULL, name[MAX_STR], *name_ind, *toks, *info = NULL;
-    FILE *f, *f1;
+    char str[MAX_STR], *command = NULL, name[MAX_STR], *toks, *info = NULL;
+    FILE *f;
     Index *index;
+    IndexDeleted *index_del;
+    FILE *find_2, *fdel;
+    char nind[MAX_STR], ndel[MAX_STR];
+    int i, id;
 
     if (argc < 3)
     {
@@ -20,27 +24,42 @@ int main(int argc, char *argv[])
     }
 
     strcpy(name, argv[2]);
+    strcpy(nind, argv[2]);
+    strcpy(ndel, argv[2]);
     strcat(name, ".db");
+    strcat(nind, ".ind");
+    strcat(ndel, ".del");
 
-    name_ind = argv[2];
-    strcat(name_ind, ".ind");
+    find_2 = fopen(nind, "a+b");
+    if (!find_2)
+        return ERR;
 
-    index = reload(name_ind);
-    if (!index){
+    fdel = fopen(ndel, "w+b");
+    if (!fdel)
+    {
+        fclose(find_2);
+        return ERR;
+    }
+
+    index = reload(nind);
+    if (!index)
+    {
+        return ERR;
+    }
+
+    index_del = initIndexDeleted(100);
+    if (!index_del)
+    {
+        freeIndex(index);
         return ERR;
     }
 
     f = fopen(name, "w");
     if (!f)
-        return ERR;
-    
-    f1 = fopen(name_ind, "w");
-    if(!f1)
     {
-        exit_lib(f, NULL, NULL);
+        exit_lib(NULL, index, NULL);
         return ERR;
     }
-    
 
     printf("Type command and argument/s.\n");
     printf("exit\n");
@@ -52,7 +71,7 @@ int main(int argc, char *argv[])
         command[strcspn(str, "\n")] = '\0';
 
         toks = strtok(NULL, "\n");
-        if(toks != NULL)
+        if (toks != NULL)
             info = toks;
 
         if (command)
@@ -65,11 +84,19 @@ int main(int argc, char *argv[])
                     printf("Error adding book\n");
             }
             else if (strcmp(command, "printInd") == 0)
-                printInd(index, stdout, f1);
-            /*else if (strcmp(command, "printRec") == 0)
-                printRec(index, f, index->size - 1);*/
-            else if(strcmp(command, "find") == 0)
-                find(index, info, f);
+                printInd(index, stdout);
+            else if (strcmp(command, "printRec") == 0)
+                printRec(index, f, index->size - 1);
+            else if (strcmp(command, "find") == 0)
+            {
+                id = atol(info);
+                find(index, id, f);
+            }
+            else if(strcmp(command, "del") == 0)
+            {
+                id = atoi(info);
+                delete(index, index_del, id);
+            }  
             else
                 printf("Write down a valid command\n");
         }
@@ -78,7 +105,19 @@ int main(int argc, char *argv[])
         printf("exit\n");
     }
 
-    exit_lib(f, index, f1);
+    for (i = 0; i < index->size; i++)
+    {
+        fwrite(&index->entries[i].key, sizeof(int), 1, find_2);
+        fwrite(&index->entries[i].offset, sizeof(size_t), 1, find_2);
+        fwrite(&index->entries[i].size, sizeof(size_t), 1, find_2);
+        fwrite(&index->entries[i].key, sizeof(int), 1, fdel);
+        fwrite(&index->entries[i].offset, sizeof(size_t), 1, fdel);
+        fwrite(&index->entries[i].size, sizeof(size_t), 1, fdel);
+    }
+
+    fclose(find_2);
+    fclose(fdel);
+    exit_lib(f, index, index_del);
 
     return OK;
 }
