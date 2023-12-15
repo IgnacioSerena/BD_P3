@@ -30,4 +30,10 @@ typedef struct {
     size_t capacity;      // Capacidad actual del índice
 } Index;
 
+typedef struct {
+    IndexEntry *entries;  // Array de entradas en el índice
+    size_t size;          // Número actual de entradas en el índice
+    size_t capacity;      // Capacidad actual del índice
+} IndexDeleted;
+
 #endif /* TYPES_H */

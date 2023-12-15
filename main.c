@@ -8,6 +8,7 @@ int main(int argc, char *argv[])
     int id;
     FILE *f;
     Index *index;
+    IndexDeleted *index_del;
 
     if (argc < 3)
     {
@@ -30,7 +31,15 @@ int main(int argc, char *argv[])
     index = initIndex(100);
     if (!index)
     {
-        exit_lib(f, NULL, argv[2]);
+        fclose(f);
+        return ERR;
+    }
+
+    index_del = initIndexDeleted(100);
+    if (!index_del)
+    {
+        freeIndex(index);
+        fclose(f);
         return ERR;
     }
 
@@ -73,7 +82,7 @@ int main(int argc, char *argv[])
         printf("exit\n");
     }
 
-    exit_lib(f, index, argv[2]);
+    exit_lib(f, index, index_del, argv[2]);
 
     return OK;
 }

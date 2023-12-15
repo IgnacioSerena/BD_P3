@@ -39,7 +39,7 @@ int add(FILE *f, char *str, Index *index)
     return OK;
 }
 
-int exit_lib(FILE *f, Index *index, char *name)
+int exit_lib(FILE *f, Index *index, IndexDeleted *index_del, char *name)
 {
     FILE *find, *fdel;
     char nind[MAX_STR], ndel[MAX_STR];
@@ -51,11 +51,11 @@ int exit_lib(FILE *f, Index *index, char *name)
     strcat(ndel, ".del");
 
     find = fopen(nind, "w+b");
-    if(!find)
+    if (!find)
         return ERR;
-    
+
     fdel = fopen(ndel, "w+b");
-    if(!fdel)
+    if (!fdel)
     {
         fclose(find);
         return ERR;
@@ -66,12 +66,15 @@ int exit_lib(FILE *f, Index *index, char *name)
         fwrite(&index->entries[i].key, sizeof(int), 1, find);
         fwrite(&index->entries[i].offset, sizeof(size_t), 1, find);
         fwrite(&index->entries[i].size, sizeof(size_t), 1, find);
+        fwrite(&index->entries[i].key, sizeof(int), 1, fdel);
+        fwrite(&index->entries[i].offset, sizeof(size_t), 1, fdel);
+        fwrite(&index->entries[i].size, sizeof(size_t), 1, fdel);
     }
-
 
     fclose(find);
     fclose(fdel);
     freeIndex(index);
+    freeIndexDeleted(index_del);
     fclose(f);
 
     return OK;
@@ -108,23 +111,28 @@ void printInd(Index *index, FILE *f)
 
 void printRec(Index *index, FILE *f, int num)
 {
-    if(index->size != num)
+    if (index->size != num)
     {
         find(index, index->entries[num++].key, f);
         printRec(index, f, num);
     }
 }
 
-int delete(Index *index, FILE *f, int key)
-{
+int delete(Index *index, IndexDeleted *index_del, FILE *f, int key)
+{   
+    int id;
+    size_t offset = ftell(f); 
+    size_t size;
     int pos = binarySearch(index, key);
-    if(pos != -1)
+    if (pos != -1)
     {
+        if (insertEntryDeleted(index_del, index->entries[pos].key, index->entries[pos].offset, index->entries[pos].size) == ERR)
+            return ERR;
 
         printf(" Record with bookId=%d has been deleted", key);
     }
-    else 
-        printf("Record with bookId=%d does not exist\n", key);  
+    else
+        printf("Record with bookId=%d does not exist\n", key);
 
     return OK;
 }

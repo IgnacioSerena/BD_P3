@@ -120,3 +120,95 @@ void printIndex(Index *index, FILE *f)
         fprintf(f, "    size: #%zu\n", index->entries[i].size);
     }
 }
+
+IndexDeleted *initIndexDeleted(size_t capacity)
+{
+
+    IndexDeleted *index = (IndexDeleted *)malloc(sizeof(IndexDeleted));
+    if (index == NULL)
+    {
+        // Manejar el error de asignación de memoria
+        exit(EXIT_FAILURE);
+    }
+
+    index->entries = (IndexEntry *)malloc(capacity * sizeof(IndexEntry));
+    if (index->entries == NULL)
+    {
+        // Manejar el error de asignación de memoria
+        free(index);
+        exit(EXIT_FAILURE);
+    }
+
+    index->size = 0;
+    index->capacity = capacity;
+
+    return index;
+}
+
+void freeIndexDeleted(IndexDeleted *index)
+{
+    free(index->entries);
+    free(index);
+}
+
+int insertEntryDeleted(IndexDeleted *index, int key, long int offset, size_t size)
+{
+    int i, pos = 0;
+
+    // Asegurarse de tener espacio suficiente
+    if (index->size == index->capacity)
+    {
+        if (expandIndex(index) == ERR)
+            return ERR; // Error al expandir el índice
+    }
+
+    while (pos < index->size && index->entries[pos].key < key)
+        pos++;
+
+    // Desplaza las entradas para abrir espacio para la nueva entrada
+    i = index->size - 1;
+    while (i >= pos)
+    {
+        index->entries[i + 1] = index->entries[i];
+        i--;
+    }
+
+    index->entries[pos].size = size;
+    index->entries[pos].key = key;
+    index->entries[pos].offset = offset;
+
+    // Incrementa el tamaño del índice
+    index->size++;
+
+    return OK;
+}
+
+int expandIndexDeleted(IndexDeleted *index)
+{
+    // Duplica la capacidad del índice
+    index->capacity *= 2;
+
+    // Realiza la realocación del array de entradas
+    index->entries = realloc(index->entries, index->capacity * sizeof(IndexEntry));
+
+    // Verifica si la realocación fue exitosa
+    if (index->entries == NULL)
+    {
+        // Manejar el error según sea necesario
+        fprintf(stderr, "Error: could not expand the index.\n");
+        return ERR;
+    }
+
+    return OK;
+}
+
+void printIndexDeleted(IndexDeleted *index, FILE *f)
+{
+    for (size_t i = 0; i < index->size; i++)
+    {
+        fprintf(f, "Entry #%zu\n", i);
+        fprintf(f, "    key: #%d\n", index->entries[i].key);
+        fprintf(f, "    offset: #%ld\n", index->entries[i].offset);
+        fprintf(f, "    size: #%zu\n", index->entries[i].size);
+    }
+}
