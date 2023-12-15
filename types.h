@@ -6,6 +6,9 @@
 #define TYPES_H
 
 #define MAX_STR 100
+#define BESTFIT 0
+#define WORSTFIT 1
+#define FIRSTFIT 2
 
 typedef enum
 {

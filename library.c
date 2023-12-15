@@ -48,13 +48,11 @@ int exit_lib(FILE *f, Index *index, FILE *f1)
     return OK;
 }
 
-int find(Index *index, char *key, FILE *f)
+int find(Index *index, int id, FILE *f)
 {
     char isbn[MAX_STR], title[MAX_STR];
-    int id, pos;
+    int pos;
     size_t tam_title;
-
-    id = atoi(key);
 
     pos = binarySearch(index, id);
     if (pos == -1)
@@ -68,7 +66,7 @@ int find(Index *index, char *key, FILE *f)
         tam_title = index->entries[pos].size - (sizeof(id) + 16 * sizeof(char));
         fread(title, tam_title, 1, f);
         title[tam_title] = '\0';
-        printf("%d%s%s\n", id, isbn, title);
+        printf("%d|%s|%s\n", id, isbn, title);
     }
 
     return OK;
@@ -79,13 +77,11 @@ void printInd(Index *index, FILE *f, FILE *f1)
     printIndex(index, f, f1);
 }
 
-/*void printRec(Index *index, FILE *f, int num)
+void printRec(Index *index, FILE *f, int num)
 {
-    if (num < 0)
-        return;
-    else
+    if(index->size != num)
     {
-        find(index, num--, f);
+        find(index, index->entries[num++].key, f);
         printRec(index, f, num);
     }
-}*/
+}
