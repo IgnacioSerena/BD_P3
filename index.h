@@ -21,4 +21,6 @@ int expandIndex(Index *index);
 // Función para imprimir el índice
 void printIndex(Index *index, FILE *f, FILE *f1);
 
+Index *reload(char *filename);
+
 #endif // INDEX_H

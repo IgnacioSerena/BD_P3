@@ -5,7 +5,6 @@
 int main(int argc, char *argv[])
 {
     char str[MAX_STR], *command = NULL, name[MAX_STR], *name_ind, *toks, *info = NULL;
-    int id;
     FILE *f, *f1;
     Index *index;
 
@@ -26,23 +25,22 @@ int main(int argc, char *argv[])
     name_ind = argv[2];
     strcat(name_ind, ".ind");
 
-    f = fopen(name, "w+b");
+    index = reload(name_ind);
+    if (!index){
+        return ERR;
+    }
+
+    f = fopen(name, "w");
     if (!f)
         return ERR;
-
-    f1 = fopen(name_ind, "w+b");
-    if (!f1)
+    
+    f1 = fopen(name_ind, "w");
+    if(!f1)
     {
         exit_lib(f, NULL, NULL);
         return ERR;
     }
-
-    index = initIndex(100);
-    if (!index)
-    {
-        exit_lib(f, NULL, f1);
-        return ERR;
-    }
+    
 
     printf("Type command and argument/s.\n");
     printf("exit\n");
@@ -54,7 +52,7 @@ int main(int argc, char *argv[])
         command[strcspn(str, "\n")] = '\0';
 
         toks = strtok(NULL, "\n");
-        if (toks != NULL)
+        if(toks != NULL)
             info = toks;
 
         if (command)
@@ -68,13 +66,10 @@ int main(int argc, char *argv[])
             }
             else if (strcmp(command, "printInd") == 0)
                 printInd(index, stdout, f1);
-            else if (strcmp(command, "printRec") == 0)
-                printRec(index, f, 0);
-            else if (strcmp(command, "find") == 0)
-            {
-                id = atoi(info);
-                find(index, id, f);
-            }
+            /*else if (strcmp(command, "printRec") == 0)
+                printRec(index, f, index->size - 1);*/
+            else if(strcmp(command, "find") == 0)
+                find(index, info, f);
             else
                 printf("Write down a valid command\n");
         }

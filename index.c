@@ -124,3 +124,37 @@ void printIndex(Index *index, FILE *f, FILE *f1)
         fwrite(&index->entries[i].size, sizeof(size_t), 1, f1);
     }
 }
+
+
+Index *reload(char *filename)
+{
+    FILE *file = NULL;
+    IndexEntry *index = NULL;
+    Index *index_array = NULL;
+
+    if(!filename)
+        return ERR;
+
+    index_array = initIndex(100);
+    if (!index)
+        return ERR;
+
+    index = (IndexEntry*)malloc(sizeof(IndexEntry));
+    if(!index){
+        printf("ERRRRRROOOOOOR");
+        return NULL;
+    }
+    file = fopen(filename, "r+b");
+    if (!file)
+        return ERR;
+
+    while(fread(&index->key, sizeof(int), 1, file) == sizeof(int)){
+        fread(&index->offset, sizeof(long int), 1, file);
+        fread(&index->size, sizeof(size_t), 1, file);
+        insertEntry(index_array, index->key, index->offset, index->size);
+    }
+
+    fclose(file);
+
+  return index_array;
+}
