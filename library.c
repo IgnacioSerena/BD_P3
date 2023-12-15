@@ -39,40 +39,8 @@ int add(FILE *f, char *str, Index *index)
     return OK;
 }
 
-int exit_lib(FILE *f, Index *index, IndexDeleted *index_del, char *name)
+int exit_lib(FILE *f, Index *index, IndexDeleted *index_del)
 {
-    FILE *find, *fdel;
-    char nind[MAX_STR], ndel[MAX_STR];
-    int i;
-
-    strcpy(nind, name);
-    strcpy(ndel, name);
-    strcat(nind, ".ind");
-    strcat(ndel, ".del");
-
-    find = fopen(nind, "w+b");
-    if (!find)
-        return ERR;
-
-    fdel = fopen(ndel, "w+b");
-    if (!fdel)
-    {
-        fclose(find);
-        return ERR;
-    }
-
-    for (i = 0; i < index->size; i++)
-    {
-        fwrite(&index->entries[i].key, sizeof(int), 1, find);
-        fwrite(&index->entries[i].offset, sizeof(size_t), 1, find);
-        fwrite(&index->entries[i].size, sizeof(size_t), 1, find);
-        fwrite(&index->entries[i].key, sizeof(int), 1, fdel);
-        fwrite(&index->entries[i].offset, sizeof(size_t), 1, fdel);
-        fwrite(&index->entries[i].size, sizeof(size_t), 1, fdel);
-    }
-
-    fclose(find);
-    fclose(fdel);
     freeIndex(index);
     freeIndexDeleted(index_del);
     fclose(f);
@@ -117,7 +85,7 @@ void printRec(Index *index, FILE *f, int num)
         printRec(index, f, num);
     }
 }
-
+/*
 int delete(Index *index, IndexDeleted *index_del, FILE *f, int key)
 {   
     int id;
@@ -135,4 +103,4 @@ int delete(Index *index, IndexDeleted *index_del, FILE *f, int key)
         printf("Record with bookId=%d does not exist\n", key);
 
     return OK;
-}
+}*/

@@ -5,10 +5,12 @@
 int main(int argc, char *argv[])
 {
     char str[MAX_STR], *command = NULL, name[MAX_STR], *toks, *info = NULL;
-    int id;
     FILE *f;
     Index *index;
     IndexDeleted *index_del;
+    FILE *find_2, *fdel;
+    char nind[MAX_STR], ndel[MAX_STR];
+    int i, id;
 
     if (argc < 3)
     {
@@ -22,26 +24,43 @@ int main(int argc, char *argv[])
     }
 
     strcpy(name, argv[2]);
+    strcpy(nind, argv[2]);
+    strcpy(ndel, argv[2]);
     strcat(name, ".db");
+    strcat(nind, ".ind");
+    strcat(ndel, ".del");
 
-    f = fopen(name, "w+b");
-    if (!f)
+    find_2 = fopen(nind, "a+b");
+    if (!find_2)
         return ERR;
 
-    index = initIndex(100);
-    if (!index)
+    fdel = fopen(ndel, "w+b");
+    if (!fdel)
     {
-        fclose(f);
+        fclose(find_2);
+        return ERR;
+    }
+
+
+    index = reload(nind);
+    if (!index){
         return ERR;
     }
 
     index_del = initIndexDeleted(100);
-    if (!index_del)
-    {
+    if (!index_del){
         freeIndex(index);
-        fclose(f);
         return ERR;
     }
+    
+
+    f = fopen(name, "w");
+    if (!f){
+        exit_lib(NULL, index, NULL);
+        return ERR;
+    }
+
+    
 
     printf("Type command and argument/s.\n");
     printf("exit\n");
@@ -53,7 +72,7 @@ int main(int argc, char *argv[])
         command[strcspn(str, "\n")] = '\0';
 
         toks = strtok(NULL, "\n");
-        if (toks != NULL)
+        if(toks != NULL)
             info = toks;
 
         if (command)
@@ -68,10 +87,9 @@ int main(int argc, char *argv[])
             else if (strcmp(command, "printInd") == 0)
                 printInd(index, stdout);
             else if (strcmp(command, "printRec") == 0)
-                printRec(index, f, 0);
-            else if (strcmp(command, "find") == 0)
-            {
-                id = atoi(info);
+                printRec(index, f, index->size - 1);
+            else if(strcmp(command, "find") == 0){
+                id = atol(info);
                 find(index, id, f);
             }
             else
@@ -82,7 +100,20 @@ int main(int argc, char *argv[])
         printf("exit\n");
     }
 
-    exit_lib(f, index, index_del, argv[2]);
+    for (i = 0; i < index->size; i++)
+    {
+        fwrite(&index->entries[i].key, sizeof(int), 1, find_2);
+        fwrite(&index->entries[i].offset, sizeof(size_t), 1, find_2);
+        fwrite(&index->entries[i].size, sizeof(size_t), 1, find_2);
+        fwrite(&index->entries[i].key, sizeof(int), 1, fdel);
+        fwrite(&index->entries[i].offset, sizeof(size_t), 1, fdel);
+        fwrite(&index->entries[i].size, sizeof(size_t), 1, fdel);
+    }
+
+
+    fclose(find_2);
+    fclose(fdel);
+    exit_lib(f, index, index_del);
 
     return OK;
 }

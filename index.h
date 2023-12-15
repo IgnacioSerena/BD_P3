@@ -36,4 +36,6 @@ int expandIndexDeleted(IndexDeleted *index);
 // Función para imprimir el índice
 void printIndexDeleted(IndexDeleted *index, FILE *f);
 
+Index *reload(char *filename);
+
 #endif // INDEX_H

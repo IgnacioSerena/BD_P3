@@ -158,7 +158,7 @@ int insertEntryDeleted(IndexDeleted *index, int key, long int offset, size_t siz
     // Asegurarse de tener espacio suficiente
     if (index->size == index->capacity)
     {
-        if (expandIndex(index) == ERR)
+        if (expandIndexDeleted(index) == ERR)
             return ERR; // Error al expandir el índice
     }
 
@@ -211,4 +211,45 @@ void printIndexDeleted(IndexDeleted *index, FILE *f)
         fprintf(f, "    offset: #%ld\n", index->entries[i].offset);
         fprintf(f, "    size: #%zu\n", index->entries[i].size);
     }
+}
+
+
+
+Index *reload(char *filename)
+{
+    FILE *file = NULL;
+    IndexEntry *index = NULL;
+    Index *index_array = NULL;
+
+    if (!filename)
+        return ERR;
+
+    index_array = initIndex(100);
+    if (!index_array)
+        return ERR;
+
+    index = (IndexEntry *)malloc(sizeof(IndexEntry));
+    if (!index){
+        freeIndex(index_array);
+        return NULL;
+    }
+    file = fopen(filename, "r+b");
+    if (!file)
+    {
+        free(index);
+        freeIndex(index_array);
+        return ERR;
+    }
+
+    while (fread(&index->key, sizeof(int), 1, file) == 1)
+    {
+        fread(&index->offset, sizeof(long int), 1, file);
+        fread(&index->size, sizeof(size_t), 1, file);
+        insertEntry(index_array, index->key, index->offset, index->size);
+    }
+
+    fclose(file);
+    free(index);
+
+    return index_array;
 }
