@@ -110,7 +110,7 @@ int expandIndex(Index *index)
 }
 
 // Función para imprimir el índice
-void printIndex(Index *index, FILE *f, FILE *f1)
+void printIndex(Index *index, FILE *f)
 {
     for (size_t i = 0; i < index->size; i++)
     {
@@ -118,9 +118,5 @@ void printIndex(Index *index, FILE *f, FILE *f1)
         fprintf(f, "    key: #%d\n", index->entries[i].key);
         fprintf(f, "    offset: #%ld\n", index->entries[i].offset);
         fprintf(f, "    size: #%zu\n", index->entries[i].size);
-
-        fwrite(&index->entries[i].key, sizeof(int), 1, f1);
-        fwrite(&index->entries[i].offset, sizeof(size_t), 1, f1);
-        fwrite(&index->entries[i].size, sizeof(size_t), 1, f1);
     }
 }

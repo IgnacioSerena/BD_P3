@@ -19,6 +19,6 @@ int binarySearch(const Index *index, int key);
 int expandIndex(Index *index);
 
 // Función para imprimir el índice
-void printIndex(Index *index, FILE *f, FILE *f1);
+void printIndex(Index *index, FILE *f);
 
 #endif // INDEX_H

@@ -4,9 +4,9 @@
 
 int main(int argc, char *argv[])
 {
-    char str[MAX_STR], *command = NULL, name[MAX_STR], *name_ind, *toks, *info = NULL;
+    char str[MAX_STR], *command = NULL, name[MAX_STR], *toks, *info = NULL;
     int id;
-    FILE *f, *f1;
+    FILE *f;
     Index *index;
 
     if (argc < 3)
@@ -23,24 +23,14 @@ int main(int argc, char *argv[])
     strcpy(name, argv[2]);
     strcat(name, ".db");
 
-    name_ind = argv[2];
-    strcat(name_ind, ".ind");
-
     f = fopen(name, "w+b");
     if (!f)
         return ERR;
 
-    f1 = fopen(name_ind, "w+b");
-    if (!f1)
-    {
-        exit_lib(f, NULL, NULL);
-        return ERR;
-    }
-
     index = initIndex(100);
     if (!index)
     {
-        exit_lib(f, NULL, f1);
+        exit_lib(f, NULL, argv[2]);
         return ERR;
     }
 
@@ -67,7 +57,7 @@ int main(int argc, char *argv[])
                     printf("Error adding book\n");
             }
             else if (strcmp(command, "printInd") == 0)
-                printInd(index, stdout, f1);
+                printInd(index, stdout);
             else if (strcmp(command, "printRec") == 0)
                 printRec(index, f, 0);
             else if (strcmp(command, "find") == 0)
@@ -83,7 +73,7 @@ int main(int argc, char *argv[])
         printf("exit\n");
     }
 
-    exit_lib(f, index, f1);
+    exit_lib(f, index, argv[2]);
 
     return OK;
 }

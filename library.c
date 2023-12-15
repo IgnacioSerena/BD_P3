@@ -39,10 +39,39 @@ int add(FILE *f, char *str, Index *index)
     return OK;
 }
 
-int exit_lib(FILE *f, Index *index, FILE *f1)
+int exit_lib(FILE *f, Index *index, char *name)
 {
+    FILE *find, *fdel;
+    char nind[MAX_STR], ndel[MAX_STR];
+    int i;
+
+    strcpy(nind, name);
+    strcpy(ndel, name);
+    strcat(nind, ".ind");
+    strcat(ndel, ".del");
+
+    find = fopen(nind, "w+b");
+    if(!find)
+        return ERR;
+    
+    fdel = fopen(ndel, "w+b");
+    if(!fdel)
+    {
+        fclose(find);
+        return ERR;
+    }
+
+    for (i = 0; i < index->size; i++)
+    {
+        fwrite(&index->entries[i].key, sizeof(int), 1, find);
+        fwrite(&index->entries[i].offset, sizeof(size_t), 1, find);
+        fwrite(&index->entries[i].size, sizeof(size_t), 1, find);
+    }
+
+
+    fclose(find);
+    fclose(fdel);
     freeIndex(index);
-    fclose(f1);
     fclose(f);
 
     return OK;
@@ -72,9 +101,9 @@ int find(Index *index, int id, FILE *f)
     return OK;
 }
 
-void printInd(Index *index, FILE *f, FILE *f1)
+void printInd(Index *index, FILE *f)
 {
-    printIndex(index, f, f1);
+    printIndex(index, f);
 }
 
 void printRec(Index *index, FILE *f, int num)
@@ -84,4 +113,18 @@ void printRec(Index *index, FILE *f, int num)
         find(index, index->entries[num++].key, f);
         printRec(index, f, num);
     }
+}
+
+int delete(Index *index, FILE *f, int key)
+{
+    int pos = binarySearch(index, key);
+    if(pos != -1)
+    {
+
+        printf(" Record with bookId=%d has been deleted", key);
+    }
+    else 
+        printf("Record with bookId=%d does not exist\n", key);  
+
+    return OK;
 }
