@@ -80,15 +80,6 @@ int insertEntry(Index *index, int key, long int offset, size_t size)
         i--;
     }
 
-    /* if(i == 0)
-     {
-         index->entries[i].size = size;
-         index->entries[i].key = key;
-         index->entries[i].offset = offset;
-         index->size++;
-         return OK;
-     }*/
-
     index->entries[pos].size = size;
     index->entries[pos].key = key;
     index->entries[pos].offset = offset;
@@ -119,7 +110,7 @@ int expandIndex(Index *index)
 }
 
 // Función para imprimir el índice
-void printIndex(Index *index, FILE *f)
+void printIndex(Index *index, FILE *f, FILE *f1)
 {
     for (size_t i = 0; i < index->size; i++)
     {
@@ -127,20 +118,9 @@ void printIndex(Index *index, FILE *f)
         fprintf(f, "    key: #%d\n", index->entries[i].key);
         fprintf(f, "    offset: #%ld\n", index->entries[i].offset);
         fprintf(f, "    size: #%zu\n", index->entries[i].size);
+
+        fwrite(&index->entries[i].key, sizeof(int), 1, f1);
+        fwrite(&index->entries[i].offset, sizeof(size_t), 1, f1);
+        fwrite(&index->entries[i].size, sizeof(size_t), 1, f1);
     }
 }
-
-/*int swap(IndexEntry *a, IndexEntry *b)
-{
-    int key_aux;
-    size_t size_aux;
-    long int offset_aux;
-
-    key_aux = a->key;
-    size_aux = a->size;
-    offset_aux = a->offset;
-
-    a->key = b->key;
-    a->size = b->size;
-    a->offset = b->offset;
-}*/

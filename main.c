@@ -30,10 +30,17 @@ int main(int argc, char *argv[])
     if (!f)
         return ERR;
     
+    f1 = fopen(name_ind, "w");
+    if(!f1)
+    {
+        exit_lib(f, NULL, NULL);
+        return ERR;
+    }
+    
     index = initIndex(100);
     if (!index)
     {
-        exit_lib(f, NULL);
+        exit_lib(f, NULL, f1);
         return ERR;
     }
 
@@ -60,7 +67,11 @@ int main(int argc, char *argv[])
                     printf("Error adding book\n");
             }
             else if (strcmp(command, "printInd") == 0)
-                printIndex(index, stdout);
+                printInd(index, stdout, f1);
+            /*else if (strcmp(command, "printRec") == 0)
+                printRec(index, f, index->size - 1);*/
+            else if(strcmp(command, "find") == 0)
+                find(index, info, f);
             else
                 printf("Write down a valid command\n");
         }
@@ -69,10 +80,7 @@ int main(int argc, char *argv[])
         printf("exit\n");
     }
 
-    f1 = fopen(name_ind, "w");
-    printIndex(index, f1);
-    fclose(f1);
-    exit_lib(f, index);
+    exit_lib(f, index, f1);
 
     return OK;
 }
